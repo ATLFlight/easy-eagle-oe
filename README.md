@@ -1,9 +1,10 @@
 # easy-eagle-oe
 
 ## Overview
-Generate a kernel and system image for the DB410C using simple make commands.
+Generate a kernel and system image for the Eagle board (Snapdragon Flight)
+using simple make commands.
 
-The Eagle board (Snapdragon Flight) uses Android boot images so there is some conversion required for the
+The Eagle board uses Android boot images so there is some conversion required for the
 kernel and DTB file and this is handled in the Makefile.
 
 ## Building the boot and rootfs images
