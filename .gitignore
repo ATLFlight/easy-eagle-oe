@@ -1,0 +1,15 @@
+build/
+meta-openembedded/
+meta-qualcomm/
+openembedded-core/
+meta-96boards/
+meta-eagle/
+meta-linaro/
+eagle_makefiles/
+.conf_patched
+.updated
+.repo
+boot-eagle.img
+downloads/
+skales/
+tmp/
