@@ -20,7 +20,7 @@ all: db410c
 
 # OE Layers are managed via repo
 .repo:
-	@repo init -u https://github.com/DBOpenSource/eagle-manifest
+	@repo init -u https://github.com/ATLFlight/eagle-manifest
 
 .updated: .repo
 	@repo sync
