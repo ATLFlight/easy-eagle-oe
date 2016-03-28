@@ -13,9 +13,6 @@ BOOT_IMG:=$(TOP)boot-eagle.img
 ROOTFS_IMG:=$(IMG_DIR)core-image-minimal-eagle.ext4
 FIRMWARE_DEST_DIR:=meta-eagle/recipes-firmware/firmware/files/
 
-GCC4_8:=gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux
-GCC4_8_URL:=http://releases.linaro.org/14.04/components/toolchain/binaries/${GCC4_8}.tar.xz
-
 all: eagle
 
 # OE Layers are managed via repo
@@ -43,12 +40,6 @@ meta-eagle/recipes-firmware/firmware/files/Flight_BSP_3.0_apq8074-le-1-0_r00015.
 	[ -L meta-eagle/recipes-firmware/firmware/files/Flight_BSP_3.0_apq8074-le-1-0_r00015.zip ] || \
 		(cd meta-eagle/recipes-firmware/firmware/files/ && ln -s ../../../../external/Flight_BSP_3.0_apq8074-le-1-0_r00015.zip .)
 
-external/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux:
-	mkdir -p external
-	[ -f external/${GCC4_8}.tar.xz ] || [ -f external/${GCC4_8}.tar ] || (cd external && wget -N ${GCC4_8_URL})
-	[ -f external/${GCC4_8}.tar ] || (cd external && unxz ${GCC4_8}.tar.xz)
-	cd external && tar xvf ${GCC4_8}.tar
-
 update: .repo
 	@repo sync
 
@@ -59,7 +50,7 @@ $(BUILDDIR): .updated
 
 # Build the rootfs
 core-image: $(ROOTFS_IMG) 
-$(ROOTFS_IMG): external/${GCC4_8} eagle-firmware
+$(ROOTFS_IMG): eagle-firmware
 	@[ -f $@ ] || ./scripts/make_bbtarget.sh $(BUILDDIR) core-image-minimal
 	@echo "rootfs image created"
 
@@ -67,7 +58,7 @@ $(ROOTFS_IMG): external/${GCC4_8} eagle-firmware
 #	@./scripts/make_bbtarget.sh $(BUILDDIR) core-image-x11
 
 # Build the Kernel
-$(IMAGE) $(DTB): external/${GCC4_8} eagle-firmware
+$(IMAGE) $(DTB): eagle-firmware
 	@./scripts/make_bbtarget.sh $(BUILDDIR) linux-eagle
 
 eagle: $(ROOTFS_IMG) $(BOOT_IMG)
