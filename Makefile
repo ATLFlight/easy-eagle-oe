@@ -1,7 +1,6 @@
 TOP := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 BUILDDIR = $(TOP)build
-MACHINE ?= "eagle"
 IMG_DIR=$(TOP)build/tmp-glibc/deploy/images/eagle/
 
 # Add skales to the path
@@ -13,6 +12,9 @@ DTB:=$(IMG_DIR)Image-apq8074-sbc.dtb
 BOOT_IMG:=$(TOP)boot-eagle.img
 ROOTFS_IMG:=$(IMG_DIR)core-image-minimal-eagle.ext4
 FIRMWARE_DEST_DIR:=meta-eagle/recipes-firmware/firmware/files/
+
+GCC4_8:=gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux
+GCC4_8_URL:=http://releases.linaro.org/14.04/components/toolchain/binaries/${GCC4_8}.tar.xz
 
 all: db410c
 
@@ -26,6 +28,13 @@ all: db410c
 	@repo sync
 	@touch .updated
 
+
+external/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux:
+	mkdir -p external
+	[ -f external/${GCC4_8}.tar.xz ] || (cd external && wget -N ${GCC4_8_URL})
+	cd external && unxz ${GCC4_8}.tar.xz
+	cd external && tar xv ${GCC4_8}.tar
+
 update: .repo
 	@repo sync
 
@@ -34,16 +43,9 @@ $(BUILDDIR): .updated
 	@mkdir -p $@
 	@./scripts/init_builddir.sh $@
 
-.PHONY bblayers: $(BUILDDIR) .conf_patched
-.conf_patched: .updated
-	@./scripts/update_bblayers.py $(BUILDDIR)/conf/bblayers.conf $(TOP)
-	@sed -i 's/^MACHINE .*/MACHINE ?= $(MACHINE)/' $(BUILDDIR)/conf/local.conf
-	@./scripts/update_local_conf.py $(BUILDDIR)/conf/local.conf $(TOP)
-	@touch $@
-	
 # Build the rootfs
 core-image: $(ROOTFS_IMG)
-$(ROOTFS_IMG): bblayers $(FIRMWARE_ZIP)
+$(ROOTFS_IMG): external/${GCC4_8} $(FIRMWARE_ZIP)
 	@[ -f $@ ] || ./scripts/make_bbtarget.sh $(BUILDDIR) core-image-minimal
 	@echo "rootfs image created"
 
@@ -51,7 +53,7 @@ $(ROOTFS_IMG): bblayers $(FIRMWARE_ZIP)
 #	@./scripts/make_bbtarget.sh $(BUILDDIR) core-image-x11
 
 # Build the Kernel
-$(IMAGE) $(DTB): bblayers 
+$(IMAGE) $(DTB): external/${GCC4_8} 
 	@./scripts/make_bbtarget.sh $(BUILDDIR) linux-eagle
 
 db410c: $(ROOTFS_IMG) $(BOOT_IMG)
